@@ -12,15 +12,18 @@ namespace fftProcessing {
         if (N <= 1) return; // Base case
         // Bit reversal permutation
         size_t j = 0;
-        for (size_t i = 1; i < N; ++i) {
-            size_t bit = N >> 1;
-            while (j >= bit) {
-                j -= bit;
-                bit >>= 1;
-            }
-            j += bit;
-            if (i < j) std::swap(data[i], data[j]);
-        }
+        for (size_t i = 0; i < N; ++i) {
+	if(i < j) std::swap(data[i], data[j]);
+	size_t m = N >> 1;
+	while(m && (j & m))
+	{
+	   j ^= m;
+	   m >>= 1;
+	
+	}
+	j ^= m;
+	}
+        
         // Cooley-Tukey FFT
         for (size_t len = 2; len <= N; len <<= 1) {
             double angle = 2 * RadarConfig::PI / len * (inverse ? -1 : 1);
@@ -34,11 +37,6 @@ namespace fftProcessing {
                     data[i + j + len / 2] = u - t;
                     w *= wlen;
                 }
-            }
-        }
-        if (inverse) {
-            for (size_t i = 0; i < N; ++i) {
-                data[i] /= N; // Normalize the result
             }
         }
     }
@@ -69,7 +67,7 @@ namespace fftProcessing {
                 for (int s = num_samples / 2; s < num_samples; s++) {
                     data[s] = 0; // Set the negative frequencies to zero
                 }
-                fft(data, true); // Apply inverse FFT to get back to time domain
+                //fft(data, true); // Apply inverse FFT to get back to time domain
                 // Copy the data back to the frame
                 for (int s = 0; s < num_samples; s++) {
                     frame[r][c][s] = data[s]; // Copy the complex value back to the frame
@@ -80,7 +78,8 @@ namespace fftProcessing {
 
   
 
-    // Apply FFT1 to the frame
+  
+//Apply FFT1 to the frame
     void apply_fft1(RadarData::Frame& frame) {
         int num_receivers = frame.size();
         int num_chirps = frame[0].size();
@@ -94,7 +93,8 @@ namespace fftProcessing {
             for (int c = 0; c < num_chirps; c++) {
                 // Perform FFT directly on the frame data
                 std::vector<std::complex<double>>& data = frame[r][c];
-                fft(data, true); // Apply FFT to the data vector
+		//std::cout<<"Size of data:" <<data.size()<<std::endl;
+                fft(data, false); // Apply FFT to the data vector
             }
         }
     }
@@ -149,8 +149,9 @@ namespace fftProcessing {
         apply_hilbert_transform_samples(frame);
         
         // Apply FFT1 on the sample dimension
-        apply_fft1(frame);
+      apply_fft1(frame);
+     
         // Apply FFT2 on the chirp dimension
-        apply_fft2(frame);
+       apply_fft2(frame);
     }
 }

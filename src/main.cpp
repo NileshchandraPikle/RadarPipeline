@@ -45,8 +45,19 @@ int main()
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = end - start;
         std::cout << "Time taken for fftProcessPipeline: " << elapsed.count() << " seconds" << std::endl;
-    
-        
+      for(int i = 0; i < 3; i++)
+	  {
+	   for(int j = 0; j < 3; j++)
+	   {
+	     for(int k = 0; k < 3; k++)
+	     {
+	      //std::cout<<frame[i][j][k];
+	     }
+	    // std::cout<<std::endl;
+	   }
+	  // std::cout<<std::endl;
+	  } 
+            
         //*********************STEP 2 PEAK DETECTION  *******************
         // Declare necessary variables for peak detection
         RadarData::NCI nci;
@@ -61,8 +72,16 @@ int main()
         elapsed = end - start;
         std::cout << "Number of peaks detected: " << peakList.size() << std::endl;
         std::cout << "Time taken for peakDetection: " << elapsed.count() << " seconds" << std::endl;
-    
-    
+        
+	for(auto peak: peakList)
+	{
+	 int a = std::get<0>(peak);
+	 int b = std::get<1>(peak);
+	 int c = std::get<2>(peak);
+
+	   //std::cout << "(" << a << ", " << b << ", " << c << ")\n";
+	}
+       
         //*********************STEP 3 MIMO SYNTHESIS PEAK SNAP DETECTION  *******************
         RadarData::PeakSnaps peakSnaps;
 
@@ -71,7 +90,13 @@ int main()
         end = std::chrono::high_resolution_clock::now();
         elapsed = end - start;
         std::cout << "Time taken for MIMO synthesis: " << elapsed.count() << " seconds" << std::endl;
-    
+        for (size_t i = 0; i < peakSnaps.size(); ++i) {
+        //std::cout << "Snap " << i << ": ";
+        for (const auto& val : peakSnaps[i]) {
+           // std::cout << "(" << val.real() << ", " << val.imag() << ") ";
+        }
+       // std::cout << "\n";
+       } 
      
         //*********************STEP 4 DOA PROCESSING  *******************
         std::vector<std::pair<double, double>> doaResults;
@@ -94,13 +119,13 @@ int main()
         TargetProcessing::TargetList targetList = TargetProcessing::detect_targets(peakSnaps, doaResults);
 
         std::cout << "Targets detected:" << std::endl;
-        for (const auto& target : targetList) {
+        /*for (const auto& target : targetList) {
             std::cout << "Location: (" << target.x << ", " << target.y << ", " << target.z << ")"
                 << ", Range: " << target.range
                 << ", Azimuth: " << target.azimuth
                 << ", Elevation: " << target.elevation
                 << ", Strength: " << target.strength << ", Relative Speed: " << target.relativeSpeed << std::endl;
-        }
+        }*/
     
     
     /*********************STEP 6 RADAR CROSS SECTION *******************/
@@ -121,13 +146,13 @@ int main()
     }
     /*********************STEP 6 EGO ESTIMATION *******************/
     double egoSpeed = EgoMotion::estimate_ego_motion(targetList);
-    std::cout << "Estimated Ego Vehicle Speed: " << egoSpeed << " m/s" << std::endl;
+    //std::cout << "Estimated Ego Vehicle Speed: " << egoSpeed << " m/s" << std::endl;
   
   	//*********************STEP 7 GHOST TARGET REMOVAL *******************/
     TargetProcessing::TargetList filteredTargets = GhostRemoval::remove_ghost_targets(targetList, egoSpeed);
 
     // Output filtered targets
-    std::cout << "Filtered Targets (after ghost removal):" << std::endl;
+    /*std::cout << "Filtered Targets (after ghost removal):" << std::endl;
     for (const auto& target : filteredTargets) {
         std::cout << "Location: (" << target.x << ", " << target.y << ", " << target.z << ")"
             << ", Range: " << target.range
@@ -135,7 +160,7 @@ int main()
             << ", Elevation: " << target.elevation
             << ", Strength: " << target.strength
             << ", Relative Speed: " << target.relativeSpeed << std::endl;
-    }
+    }*/
 	std::cout << "Number of targets after ghost removal: " << filteredTargets.size() << std::endl;
   }
     // Keep the terminal display until a key is pressed
